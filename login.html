@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Transportasi App - Login</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+</head>
+<body class="bg-gray-100 flex items-center justify-center min-h-screen">
+
+    <div class="bg-white p-8 rounded-lg shadow-md w-full max-w-md">
+        <div id="authTitle" class="text-2xl font-bold mb-6 text-center text-blue-600">Login User</div>
+        
+        <form id="authForm" class="space-y-4">
+            <div id="registerFields" class="hidden space-y-4">
+                <input type="text" id="nama" placeholder="Nama Lengkap" class="w-full p-2 border rounded">
+                <input type="text" id="no_hp" placeholder="Nomor HP" class="w-full p-2 border rounded">
+            </div>
+            
+            <input type="email" id="email" placeholder="Email" class="w-full p-2 border rounded" required>
+            <input type="password" id="password" placeholder="Password" class="w-full p-2 border rounded" required>
+            
+            <button type="submit" id="btnSubmit" class="w-full bg-blue-600 text-white p-2 rounded hover:bg-blue-700 transition">Login</button>
+        </form>
+
+        <div class="mt-4 text-center">
+            <button onclick="toggleAuth()" id="btnSwitch" class="text-sm text-blue-500 hover:underline">
+                Belum punya akun? Daftar
+            </button>
+        </div>
+    </div>
+
+    <script>
+        let isLogin = true;
+        const API_URL = "http://localhost:3001";
+
+        // ✅ AUTO REDIRECT kalau sudah login
+        if (localStorage.getItem("token")) {
+            window.location.href = "dashboard.html";
+        }
+
+        function toggleAuth() {
+            isLogin = !isLogin;
+
+            document.getElementById('registerFields').classList.toggle('hidden');
+            document.getElementById('authTitle').innerText = isLogin ? 'Login User' : 'Daftar Akun';
+            document.getElementById('btnSubmit').innerText = isLogin ? 'Login' : 'Register';
+            document.getElementById('btnSwitch').innerText = isLogin 
+                ? 'Belum punya akun? Daftar' 
+                : 'Sudah punya akun? Login';
+        }
+
+        document.getElementById('authForm').addEventListener('submit', async (e) => {
+            e.preventDefault();
+
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
+
+            if (!email || !password) {
+                alert("Email dan password wajib diisi!");
+                return;
+            }
+
+            try {
+                if (isLogin) {
+                    // ================= LOGIN =================
+                    const res = await fetch(`${API_URL}/login`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ email, password })
+                    });
+
+                    const data = await res.json();
+
+                    if (data.token) {
+                        localStorage.setItem('token', data.token);
+
+                        alert("Login berhasil!");
+                        window.location.href = 'dashboard.html';
+                    } else {
+                        alert(data.message || "Login gagal");
+                    }
+
+                } else {
+                    // ================= REGISTER =================
+                    const nama = document.getElementById('nama').value.trim();
+                    const no_hp = document.getElementById('no_hp').value.trim();
+
+                    if (!nama || !no_hp) {
+                        alert("Semua field harus diisi!");
+                        return;
+                    }
+
+                    const res = await fetch(`${API_URL}/register`, {
+                        method: 'POST',
+                        headers: { 'Content-Type': 'application/json' },
+                        body: JSON.stringify({ nama, email, password, no_hp })
+                    });
+
+                    const data = await res.json();
+
+                    if (res.ok) {
+                        alert("Register berhasil! Silakan login.");
+                        toggleAuth();
+                    } else {
+                        alert(data.message || "Register gagal");
+                    }
+                }
+
+            } catch (error) {
+                console.error(error);
+                alert("Server tidak terhubung!");
+            }
+        });
+    </script>
+</body>
+</html>
