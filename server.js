@@ -19,11 +19,14 @@ const SECRET_KEY = "rahasia123";
 
 // ✅ Koneksi database + error handling
 const db = mysql.createConnection({
-  host: "localhost",
+  host: "turntable.proxy.rlwy.net",
   user: "root",
-  password: "",
-  database: "transportasi_db"
+  password: "yGpwwxwtgjjKNtajCEqvIMmtfEKGpHtH",
+  port: 51653,
+  database: "railway"
 });
+
+// mysql://root:yGpwwxwtgjjKNtajCEqvIMmtfEKGpHtH@turntable.proxy.rlwy.net:51653/railway
 
 db.connect((err) => {
   if (err) {
